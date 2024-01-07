@@ -155,8 +155,7 @@ jobs:
           draft: false
           prerelease: true
     
-      - name: Get branch name
-        id: get_branch
+      - name: test
         run: ls
 
       - name: Upload Web Release Asset
