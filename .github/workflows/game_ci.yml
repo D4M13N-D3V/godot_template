@@ -1,4 +1,4 @@
-name: "Godot 4.1.2 CI/CD"
+name: "Godot 4.2.1 CI/CD"
 
 env:
   GODOT_VERSION: 4.2.1
@@ -15,7 +15,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: barichello/godot-ci:4.1.2
+      image: barichello/godot-ci:4.2.1
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -60,7 +60,7 @@ jobs:
       contents: write
 
     container:
-      image: barichello/godot-ci:4.1.2
+      image: barichello/godot-ci:4.2.1
 
     steps:
       - name: Checkout
@@ -90,7 +90,7 @@ jobs:
       contents: write
 
     container:
-      image: barichello/godot-ci:4.1.2
+      image: barichello/godot-ci:4.2.1
 
     steps:
       - name: Checkout
@@ -166,7 +166,7 @@ jobs:
           body: |
             Release notes for ${{env.GitVersion_MajorMinorPatch}}
           draft: false
-          prerelease: false
+          prerelease: true
 
       - name: Upload Web Release Asset
         id: upload-release-asset
