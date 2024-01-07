@@ -131,19 +131,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: game_web
-          path: build/web
 
       - name: Download Linux artifacts
         uses: actions/download-artifact@v4
         with:
           name: game_linux
-          path: build/linux
 
       - name: Download Windows artifacts
         uses: actions/download-artifact@v4
         with:
           name: game_windows
-          path: build/windows
 
       - name: Create Release
         id: create_release
@@ -165,7 +162,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/web/game_web.zip
+          asset_path: game_web.zip
           asset_name: Godot_Game_Web.zip
           asset_content_type: application/zip
 
@@ -176,7 +173,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/linux/linux_game.zip
+          asset_path: linux_game.zip
           asset_name: Godot_Game_Linux.zip
           asset_content_type: application/zip
 
@@ -187,6 +184,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/windows/windows_game.zip
+          asset_path: windows_game.zip
           asset_name: Godot_Game_Windows.zip
           asset_content_type: application/zip
