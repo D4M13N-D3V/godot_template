@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: game_linux
-          path: build/linux/game_linux.zip
+          path: game_linux.zip
   windows:
     runs-on: ubuntu-latest
     permissions:
@@ -104,7 +104,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: game_windows
-          path: build/windows/game_windows.zip
+          path: game_windows.zip
   release:
     needs: [web, linux, windows]
     runs-on: ubuntu-latest
