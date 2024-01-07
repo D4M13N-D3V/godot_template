@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  build-web:
+  web:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Move HTML5 templates into position
+      - name: Move export templates into position
         run: |
           mkdir -v -p ~/.local/share/godot/export_templates
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
@@ -29,14 +29,7 @@ jobs:
 
       - name: Build
         run: godot -v --export-release --headless "Web"
-  deploy-web:
-    runs-on: ubuntu-latest
-    needs: build-web
-    permissions:
-      contents: write
-    container:
-      image: barichello/godot-ci:4.1.2
-    steps:
+
       - name: Add coi-service-worker
         run: |
           git clone https://github.com/gzuidhof/coi-serviceworker.git
@@ -52,8 +45,7 @@ jobs:
           user_name: "github-ci[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"
           commit_message: "UPDATE GITHUB PAGES"
-  
-  build_linux:
+  linux:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -65,7 +57,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Move HTML5 templates into position
+      - name: Move export templates into position
         run: |
           mkdir -v -p ~/.local/share/godot/export_templates
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
@@ -73,20 +65,77 @@ jobs:
         run: mkdir -v -p build/linux
 
       - name: Build for Linux
-        run: godot -v --export "Linux/X11" --path . --output "build/linux/game.x86_64"
-  zip_linux:
-    needs: build_linux
-    runs-on: ubuntu-latest
-    steps:
-      - name: Zip Linux artifacts
-        run: cd build/linux && zip -r game_linux.zip game.x86_64
-  upload_linux:
-    needs: zip_linux
-    runs-on: ubuntu-latest
+        run: godot -v --export-release "Linux/X11" --path . --output "build/linux/game.x86_64"
 
-    steps:
+      - name: Zip Linux artifacts
+        run: zip -r game_linux.zip build/linux
+
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v2
         with:
           name: game_linux
           path: build/linux/game_linux.zip
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    container:
+      image: barichello/godot-ci:4.1.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Move export templates into position
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Create staging directory
+        run: mkdir -v -p build/web
+
+      - name: Build
+        run: godot -v --export-release --headless "Web"
+
+      - name: Add coi-service-worker
+        run: |
+          git clone https://github.com/gzuidhof/coi-serviceworker.git
+          mv coi-serviceworker/coi-serviceworker.js build/web/coi-serviceworker.js
+          sed -i '3 i <script src="coi-serviceworker.js"></script>' build/web/index.html
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3.9.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+          force_orphan: true
+          user_name: "github-ci[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "UPDATE GITHUB PAGES"
+  windows:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    container:
+      image: barichello/godot-ci:4.1.2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Move export templates into position
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Create staging directory
+        run: mkdir -v -p build/windows
+
+      - name: Build for windows
+        run: godot -v --export-release "Windows Desktop" --path . --output "build/windows/game.x86_64"
+
+      - name: Zip Windows artifacts
+        run: zip -r game_windows.zip build/windows
+
+      - name: Upload windows artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: game_windows
+          path: build/windows/game_windows.zip
