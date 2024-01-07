@@ -176,7 +176,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: linux_game.zip
+          asset_path: game_linux.zip
           asset_name: Godot_Game_Linux.zip
           asset_content_type: application/zip
 
@@ -187,6 +187,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: windows_game.zip
+          asset_path: game_windows.zip
           asset_name: Godot_Game_Windows.zip
           asset_content_type: application/zip
