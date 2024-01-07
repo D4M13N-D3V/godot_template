@@ -1,6 +1,7 @@
 # Overview
 This is a repository that provides a template for you to start your Godot repositories on GitHub. This repository contains a basic project setup along with CI/CD. By default it will build for windows, linux and the web and upload their artifacts, along with deploying a build to GitHub Pages.
-
+# How to deploy to GitHub Pages
+Go to the settings of your repository, and then on the left hand side click pages. You should then be able to click a drop down near the top of the page to deploy from a branch, deploy from the gh-pages branch once the workflow has executed.
 Example Deployment https://damientehdemon.github.io/godot_template/
 # Recommended Flow
 To use this properly we recommend creating pull requests into the main branch, and merging your changes in that way. We recommend making a small change to the workflow file in `/.github/workflows/game_ci.yaml` and changing line `169` from `prerelease: false` to `prerelease: true`. Whenever you want to do a proper release, you can go to the list of releases on your repository and change it to be a full release instead of pre-release. This will allow you to have builds for every version of the game, while also maintaining a selection of stable builds.
