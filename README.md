@@ -2,7 +2,7 @@
 This is a repository that provides a template for you to start your Godot repositories on GitHub. This repository contains a basic project setup along with CI/CD. By default it will build for windows, linux and the web and upload their artifacts, along with deploying a build to GitHub Pages.
 # How to deploy to GitHub Pages
 Go to the settings of your repository, and then on the left hand side click pages. You should then be able to click a drop down near the top of the page to deploy from a branch, deploy from the gh-pages branch once the workflow has executed.
-Example Deployment https://damientehdemon.github.io/godot_template/
+Example Deployment https://D4M13N-D3V.github.io/godot_template/
 ![image](https://github.com/DamienTehDemon/godot_template/assets/13697702/80a76d39-65be-4de4-ab47-91fbeb3eabd2)
 
 # Changing the Godot version
