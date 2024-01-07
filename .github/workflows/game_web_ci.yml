@@ -45,6 +45,15 @@ jobs:
           user_name: "github-ci[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"
           commit_message: "UPDATE GITHUB PAGES"
+
+      - name: Zip Web artifacts
+        run: zip -r game_web.zip build/web
+
+      - name: Upload Web artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: game_web
+          path: game_web.zip
   linux:
     runs-on: ubuntu-latest
     permissions:
