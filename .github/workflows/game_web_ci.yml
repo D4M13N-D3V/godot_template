@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - v*
 
 jobs:
   web:
@@ -105,3 +105,79 @@ jobs:
         with:
           name: game_windows
           path: build/windows/game_windows.zip
+  release:
+    needs: [web, linux, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get branch name
+        id: get_branch
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: game_web
+          path: build/web
+
+      - name: Download Linux artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: game_linux
+          path: build/linux
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: game_windows
+          path: build/windows
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.GODOT_VERSION }}-${{ env.BRANCH_NAME }}
+          release_name: Godot v${{ env.GODOT_VERSION }} Release - ${{ env.BRANCH_NAME }}
+          body: |
+            Release notes for Godot v${{ env.GODOT_VERSION }} on branch ${{ env.BRANCH_NAME }}.
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/web/*
+          asset_name: Godot_Game_Web.zip
+          asset_content_type: application/zip
+
+      - name: Upload Linux Release Asset
+        id: upload-linux-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/linux/*
+          asset_name: Godot_Game_Linux.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows Release Asset
+        id: upload-windows-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/windows/*
+          asset_name: Godot_Game_Windows.zip
+          asset_content_type: application/zip
