@@ -12,7 +12,7 @@ To use this properly we recommend creating pull requests into the main branch, a
 # Requirments
 In order for the workflows in this repository to work with an existing project it requires certain export profiles to be configured. You need to have a windows, linux, and web export configured using the default names: "Windows Desktop","Linux/X11", and "Web".
 # Migrating existing project
-If you want to add this to an existing GitHub repository, just copy and paste the `.github` folder into the root of your existing repository. As long as your project has these exports and resides in the root of the repository the GitHub workflows should work fine. 
+If you want to add this to an existing GitHub repository, just copy and paste the `.github` folder into the root of your existing repository, along with the `export_presets.cfg` file. As long as your project has these exports and resides in the root of the repository the GitHub workflows should work fine. 
 # Versioning
 When you push to the `main` branch the workflow will automatically be executed. The workflow will build for Web,Linux, and Windows, and then upload the build artifacts to the workflow. Then a new step will execute which will generate version numbers based on the commits. You can see below which keywords a commit message must start with to increment a major,minor, or patch number. At the end the workflow will create a release and upload the build artifacts to it.
 
