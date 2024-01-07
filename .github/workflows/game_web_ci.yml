@@ -1,4 +1,4 @@
-name: "Publish to GitHub Pages"
+name: "Godot 4.1.2 CI/CD"
 
 env:
   GODOT_VERSION: 4.1.2
@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  build_linux:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,11 +27,116 @@ jobs:
           mkdir -v -p ~/.local/share/godot/export_templates
           mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
       - name: Create staging directory
-        run: mkdir -v -p build/web
+        run: mkdir -v -p build/linux
 
-      - name: Build
-        run: godot -v --export-release --headless "Web"
+      - name: Build for Linux
+        run: godot -v --export "Linux/X11" --path . --output "build/linux/game.x86_64"
 
+  zip_linux:
+    needs: build_linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Zip Linux artifacts
+        run: cd build/linux && zip -r game_linux.zip game.x86_64
+
+  upload_linux:
+    needs: zip_linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: game_linux
+          path: build/linux/game_linux.zip
+
+  build_windows:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    container:
+      image: barichello/godot-ci:4.1.2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Move HTML5 templates into position
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Create staging directory
+        run: mkdir -v -p build/windows
+
+      - name: Build for Windows
+        run: godot -v --export "Windows Desktop" --path . --output "build/windows/game.exe"
+
+  zip_windows:
+    needs: build_windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Zip Windows artifacts
+        run: cd build/windows && zip -r game_windows.zip game.exe
+
+  upload_windows:
+    needs: zip_windows
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: game_windows
+          path: build/windows/game_windows.zip
+
+  build_mac:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    container:
+      image: barichello/godot-ci:4.1.2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Move HTML5 templates into position
+        run: |
+          mkdir -v -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+      - name: Create staging directory
+        run: mkdir -v -p build/mac
+
+      - name: Build for Mac
+        run: godot -v --export "Mac OSX" --path . --output "build/mac/game.zip"
+
+  zip_mac:
+    needs: build_mac
+    runs-on: macos-latest
+
+    steps:
+      - name: Zip Mac artifacts
+        run: cd build/mac && zip -r game_mac.zip game.zip
+
+  upload_mac:
+    needs: zip_mac
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Upload Mac artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: game_mac
+          path: build/mac/game_mac.zip
+
+  add_service_worker:
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Add coi-service-worker
         run: |
           git clone https://github.com/gzuidhof/coi-serviceworker.git
@@ -40,6 +145,11 @@ jobs:
           ls build/web/
           sed -i '3 i <script src="coi-serviceworker.js"></script>' build/web/index.html
 
+  deploy:
+    needs: [upload_linux, upload_windows, upload_mac, add_service_worker]
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3.9.3
         with:
