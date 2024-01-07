@@ -65,7 +65,7 @@ jobs:
         run: mkdir -v -p build/linux
 
       - name: Build for Linux
-        run: godot -v --export-release "Linux/X11" --path . --output "build/linux/game.x86_64"
+        run: godot -v --export-release --headless "Linux/X11" --path . --output "build/linux/game.x86_64"
 
       - name: Zip Linux artifacts
         run: zip -r game_linux.zip build/linux
@@ -95,7 +95,7 @@ jobs:
         run: mkdir -v -p build/windows
 
       - name: Build for windows
-        run: godot -v --export-release "Windows Desktop" --path . --output "build/windows/game.x86_64"
+        run: godot -v --export-release --headless "Windows Desktop" --path . --output "build/windows/game.x86_64"
 
       - name: Zip Windows artifacts
         run: zip -r game_windows.zip build/windows
