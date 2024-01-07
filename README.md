@@ -28,7 +28,7 @@ minor-version-bump-message: "^(feat)(\\([\\w\\s-]*\\))?:"
 patch-version-bump-message: "^(build|chore|ci|docs|fix|perf|refactor|revert|style|test)(\\([\\w\\s-]*\\))?:"
 ```
 # Alternative Workflows
-
+In order to use these just place a file in the `/.github/workflows/` folder with the contents below. Make sure that it has the file extension .yml.
 ### Web,Linux,Windows - No GitHub Pages CI
 ```
 ```
