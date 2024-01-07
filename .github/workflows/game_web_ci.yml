@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - v*
+      - main
 
 jobs:
   web:
@@ -123,6 +123,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.15
+        with:
+          versionSpec: '5.x'
+
+      - name: Execute GitVersion
+        uses: gittools/actions/gitversion/execute@v0.9.15
+        with:
+          useConfigFile: true
+          configFilePath: GitVersion.yml
+
       - name: Get branch name
         id: get_branch
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
@@ -148,10 +159,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.BRANCH_NAME }}
-          release_name: ${{ env.BRANCH_NAME }}
+          tag_name: env.GitVersion_MajorMinorPatch
+          release_name: env.GitVersion_MajorMinorPatch
           body: |
-            Release notes for ${{ env.BRANCH_NAME }}.
+            Release notes for env.GitVersion_MajorMinorPatch.
           draft: false
           prerelease: true
     
