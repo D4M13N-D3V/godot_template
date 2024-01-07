@@ -2,10 +2,6 @@ name: "Godot 4.1.2 CI/CD"
 
 env:
   GODOT_VERSION: 4.1.2
-  BUILD_WEB: 'true'  # Set to 'true' to build for Web
-  BUILD_LINUX: 'true'  # Set to 'true' to build for Linux
-  BUILD_WINDOWS: 'true'  # Set to 'true' to build for Windows
-  DEPLOY_GH_PAGES: 'true'  # Set to 'true' to deploy to GitHub Pages
 
 on:
   workflow_dispatch:
@@ -15,12 +11,11 @@ on:
 
 jobs:
   web:
-    if: ${{ env.BUILD_WEB == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
     container:
-      image: barichello/godot-ci:${{ env.GODOT_VERSION }}
+      image: barichello/godot-ci:4.1.2
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +37,6 @@ jobs:
           sed -i '3 i <script src="coi-serviceworker.js"></script>' build/web/index.html
 
       - name: Deploy
-        if: ${{ env.DEPLOY_GH_PAGES == 'true' }}
         uses: peaceiris/actions-gh-pages@v3.9.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -60,14 +54,14 @@ jobs:
         with:
           name: game_web
           path: game_web.zip
-
   linux:
-    if: ${{ env.BUILD_LINUX == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     container:
-      image: barichello/godot-ci:${{ env.GODOT_VERSION }}
+      image: barichello/godot-ci:4.1.2
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,14 +84,14 @@ jobs:
         with:
           name: game_linux
           path: game_linux.zip
-
   windows:
-    if: ${{ env.BUILD_WINDOWS == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     container:
-      image: barichello/godot-ci:${{ env.GODOT_VERSION }}
+      image: barichello/godot-ci:4.1.2
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -120,7 +114,6 @@ jobs:
         with:
           name: game_windows
           path: game_windows.zip
-
   release:
     needs: [web, linux, windows]
     runs-on: ubuntu-latest
@@ -182,4 +175,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/linux/*
+          asset_name: Godot_Game_Linux.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows Release Asset
+        id: upload-windows-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/windows/*
+          asset_name: Godot_Game_Windows.zip
+          asset_content_type: application/zip
