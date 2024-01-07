@@ -5,6 +5,8 @@ Go to the settings of your repository, and then on the left hand side click page
 Example Deployment https://damientehdemon.github.io/godot_template/
 ![image](https://github.com/DamienTehDemon/godot_template/assets/13697702/80a76d39-65be-4de4-ab47-91fbeb3eabd2)
 
+# Changing the Godot version
+You can do this by making a small change to the workflow file in `/.github/workflows/game_ci.yaml`. At the top of the file you will see a environment variable for the godot version, just change this to whatever version you want to use to build your game.
 # Recommended Flow
 To use this properly we recommend creating pull requests into the main branch, and merging your changes in that way. We recommend making a small change to the workflow file in `/.github/workflows/game_ci.yaml` and changing line `169` from `prerelease: false` to `prerelease: true`. Whenever you want to do a proper release, you can go to the list of releases on your repository and change it to be a full release instead of pre-release. This will allow you to have builds for every version of the game, while also maintaining a selection of stable builds.
 # Requirments
