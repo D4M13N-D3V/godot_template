@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - v*
+      - main
 
 jobs:
   web:
@@ -18,7 +18,7 @@ jobs:
       image: barichello/godot-ci:4.1.2
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Move export templates into position
         run: |
@@ -45,6 +45,15 @@ jobs:
           user_name: "github-ci[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"
           commit_message: "UPDATE GITHUB PAGES"
+
+      - name: Zip Web artifacts
+        run: zip -r game_web.zip build/web
+
+      - name: Upload Web artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: game_web
+          path: game_web.zip
   linux:
     runs-on: ubuntu-latest
     permissions:
@@ -55,7 +64,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Move export templates into position
         run: |
@@ -71,10 +80,10 @@ jobs:
         run: zip -r game_linux.zip build/linux
 
       - name: Upload Linux artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: game_linux
-          path: build/linux/game_linux.zip
+          path: game_linux.zip
   windows:
     runs-on: ubuntu-latest
     permissions:
@@ -85,7 +94,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Move export templates into position
         run: |
@@ -101,42 +110,50 @@ jobs:
         run: zip -r game_windows.zip build/windows
 
       - name: Upload windows artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: game_windows
-          path: build/windows/game_windows.zip
+          path: game_windows.zip
   release:
     needs: [web, linux, windows]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
+      - name: Set up GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.15
+        with:
+          versionSpec: '5.x'
+
+      - name: Execute GitVersion
+        uses: gittools/actions/gitversion/execute@v0.9.15
+        with:
+          useConfigFile: true
+          configFilePath: GitVersion.yml
+
       - name: Get branch name
         id: get_branch
         run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_ENV
 
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: game_web
-          path: build/web
 
       - name: Download Linux artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: game_linux
-          path: build/linux
 
       - name: Download Windows artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: game_windows
-          path: build/windows
 
       - name: Create Release
         id: create_release
@@ -144,21 +161,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ env.GODOT_VERSION }}-${{ env.BRANCH_NAME }}
-          release_name: Godot v${{ env.GODOT_VERSION }} Release - ${{ env.BRANCH_NAME }}
+          tag_name: env.GitVersion_MajorMinorPatch
+          release_name: env.GitVersion_MajorMinorPatch
           body: |
-            Release notes for Godot v${{ env.GODOT_VERSION }} on branch ${{ env.BRANCH_NAME }}.
+            Release notes for env.GitVersion_MajorMinorPatch.
           draft: false
-          prerelease: false
+          prerelease: true
+    
+      - name: test
+        run: ls
 
-      - name: Upload Release Asset
+      - name: Upload Web Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/web/*
+          asset_path: game_web.zip
           asset_name: Godot_Game_Web.zip
           asset_content_type: application/zip
 
@@ -169,7 +189,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/linux/*
+          asset_path: game_linux.zip
           asset_name: Godot_Game_Linux.zip
           asset_content_type: application/zip
 
@@ -180,6 +200,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/windows/*
+          asset_path: game_windows.zip
           asset_name: Godot_Game_Windows.zip
           asset_content_type: application/zip
