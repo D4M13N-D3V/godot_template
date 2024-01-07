@@ -166,7 +166,7 @@ jobs:
           body: |
             Release notes for ${{env.GitVersion_MajorMinorPatch}}
           draft: false
-          prerelease: true
+          prerelease: false
     
       - name: test
         run: ls
