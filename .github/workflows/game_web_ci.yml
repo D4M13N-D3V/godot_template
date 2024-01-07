@@ -118,7 +118,7 @@ jobs:
     needs: [web, linux, windows]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -151,10 +151,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ env.GODOT_VERSION }}-${{ env.BRANCH_NAME }}
-          release_name: Godot v${{ env.GODOT_VERSION }} Release - ${{ env.BRANCH_NAME }}
+          tag_name: v${{ env.BRANCH_NAME }}
+          release_name: ${{ env.BRANCH_NAME }}
           body: |
-            Release notes for Godot v${{ env.GODOT_VERSION }} on branch ${{ env.BRANCH_NAME }}.
+            Release notes for ${{ env.BRANCH_NAME }}.
           draft: false
           prerelease: false
 
