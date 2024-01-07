@@ -148,12 +148,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ env.BRANCH_NAME }}
+          tag_name: ${{ env.BRANCH_NAME }}
           release_name: ${{ env.BRANCH_NAME }}
           body: |
             Release notes for ${{ env.BRANCH_NAME }}.
           draft: false
           prerelease: true
+    
+      - name: Get branch name
+        id: get_branch
+        run: ls
 
       - name: Upload Web Release Asset
         id: upload-release-asset
